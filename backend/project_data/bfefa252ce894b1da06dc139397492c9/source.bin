@@ -1,0 +1,261 @@
+Business Name,Category,City,Converted
+Café 0,shop,São Paulo,0.0
+Café 1,resto,München,0.1
+Café 2,shop,München,0.2
+Café 3,resto,São Paulo,0.3
+Café 4,shop,München,0.4
+Café 5,resto,München,0.5
+Café 6,shop,São Paulo,0.6
+Café 7,resto,München,0.7
+Café 8,shop,München,0.8
+Café 9,resto,São Paulo,0.9
+Café 10,shop,München,1.0
+Café 11,resto,München,1.1
+Café 12,shop,São Paulo,1.2
+Café 13,resto,München,1.3
+Café 14,shop,München,1.4
+Café 15,resto,São Paulo,1.5
+Café 16,shop,München,1.6
+Café 17,resto,München,1.7
+Café 18,shop,São Paulo,1.8
+Café 19,resto,München,1.9
+Café 20,shop,München,2.0
+Café 21,resto,São Paulo,2.1
+Café 22,shop,München,2.2
+Café 23,resto,München,2.3
+Café 24,shop,São Paulo,2.4
+Café 25,resto,München,2.5
+Café 26,shop,München,2.6
+Café 27,resto,São Paulo,2.7
+Café 28,shop,München,2.8
+Café 29,resto,München,2.9
+Café 30,shop,São Paulo,3.0
+Café 31,resto,München,3.1
+Café 32,shop,München,3.2
+Café 33,resto,São Paulo,3.3
+Café 34,shop,München,3.4
+Café 35,resto,München,3.5
+Café 36,shop,São Paulo,3.6
+Café 37,resto,München,3.7
+Café 38,shop,München,3.8
+Café 39,resto,São Paulo,3.9
+Café 40,shop,München,4.0
+Café 41,resto,München,4.1
+Café 42,shop,São Paulo,4.2
+Café 43,resto,München,4.3
+Café 44,shop,München,4.4
+Café 45,resto,São Paulo,4.5
+Café 46,shop,München,4.6
+Café 47,resto,München,4.7
+Café 48,shop,São Paulo,4.8
+Café 49,resto,München,4.9
+Café 50,shop,München,5.0
+Café 51,resto,São Paulo,5.1
+Café 52,shop,München,5.2
+Café 53,resto,München,5.3
+Café 54,shop,São Paulo,5.4
+Café 55,resto,München,5.5
+Café 56,shop,München,5.6
+Café 57,resto,São Paulo,5.7
+Café 58,shop,München,5.8
+Café 59,resto,München,5.9
+Café 60,shop,São Paulo,6.0
+Café 61,resto,München,6.1
+Café 62,shop,München,6.2
+Café 63,resto,São Paulo,6.3
+Café 64,shop,München,6.4
+Café 65,resto,München,6.5
+Café 66,shop,São Paulo,6.6
+Café 67,resto,München,6.7
+Café 68,shop,München,6.8
+Café 69,resto,São Paulo,6.9
+Café 70,shop,München,7.0
+Café 71,resto,München,7.1
+Café 72,shop,São Paulo,7.2
+Café 73,resto,München,7.3
+Café 74,shop,München,7.4
+Café 75,resto,São Paulo,7.5
+Café 76,shop,München,7.6
+Café 77,resto,München,7.7
+Café 78,shop,São Paulo,7.8
+Café 79,resto,München,7.9
+Café 80,shop,München,8.0
+Café 81,resto,São Paulo,8.1
+Café 82,shop,München,8.2
+Café 83,resto,München,8.3
+Café 84,shop,São Paulo,8.4
+Café 85,resto,München,8.5
+Café 86,shop,München,8.6
+Café 87,resto,São Paulo,8.7
+Café 88,shop,München,8.8
+Café 89,resto,München,8.9
+Café 90,shop,São Paulo,9.0
+Café 91,resto,München,9.1
+Café 92,shop,München,9.2
+Café 93,resto,São Paulo,9.3
+Café 94,shop,München,9.4
+Café 95,resto,München,9.5
+Café 96,shop,São Paulo,9.6
+Café 97,resto,München,9.7
+Café 98,shop,München,9.8
+Café 99,resto,São Paulo,9.9
+Café 100,shop,München,10.0
+Café 101,resto,München,10.1
+Café 102,shop,São Paulo,10.2
+Café 103,resto,München,10.3
+Café 104,shop,München,10.4
+Café 105,resto,São Paulo,10.5
+Café 106,shop,München,10.6
+Café 107,resto,München,10.7
+Café 108,shop,São Paulo,10.8
+Café 109,resto,München,10.9
+Café 110,shop,München,11.0
+Café 111,resto,São Paulo,11.1
+Café 112,shop,München,11.2
+Café 113,resto,München,11.3
+Café 114,shop,São Paulo,11.4
+Café 115,resto,München,11.5
+Café 116,shop,München,11.6
+Café 117,resto,São Paulo,11.7
+Café 118,shop,München,11.8
+Café 119,resto,München,11.9
+Café 120,shop,São Paulo,12.0
+Café 121,resto,München,12.1
+Café 122,shop,München,12.2
+Café 123,resto,São Paulo,12.3
+Café 124,shop,München,12.4
+Café 125,resto,München,12.5
+Café 126,shop,São Paulo,12.6
+Café 127,resto,München,12.7
+Café 128,shop,München,12.8
+Café 129,resto,São Paulo,12.9
+Café 130,shop,München,13.0
+Café 131,resto,München,13.1
+Café 132,shop,São Paulo,13.2
+Café 133,resto,München,13.3
+Café 134,shop,München,13.4
+Café 135,resto,São Paulo,13.5
+Café 136,shop,München,13.6
+Café 137,resto,München,13.7
+Café 138,shop,São Paulo,13.8
+Café 139,resto,München,13.9
+Café 140,shop,München,14.0
+Café 141,resto,São Paulo,14.1
+Café 142,shop,München,14.2
+Café 143,resto,München,14.3
+Café 144,shop,São Paulo,14.4
+Café 145,resto,München,14.5
+Café 146,shop,München,14.6
+Café 147,resto,São Paulo,14.7
+Café 148,shop,München,14.8
+Café 149,resto,München,14.9
+Café 150,shop,São Paulo,15.0
+Café 151,resto,München,15.1
+Café 152,shop,München,15.2
+Café 153,resto,São Paulo,15.3
+Café 154,shop,München,15.4
+Café 155,resto,München,15.5
+Café 156,shop,São Paulo,15.6
+Café 157,resto,München,15.7
+Café 158,shop,München,15.8
+Café 159,resto,São Paulo,15.9
+Café 160,shop,München,16.0
+Café 161,resto,München,16.1
+Café 162,shop,São Paulo,16.2
+Café 163,resto,München,16.3
+Café 164,shop,München,16.4
+Café 165,resto,São Paulo,16.5
+Café 166,shop,München,16.6
+Café 167,resto,München,16.7
+Café 168,shop,São Paulo,16.8
+Café 169,resto,München,16.9
+Café 170,shop,München,17.0
+Café 171,resto,São Paulo,17.1
+Café 172,shop,München,17.2
+Café 173,resto,München,17.3
+Café 174,shop,São Paulo,17.4
+Café 175,resto,München,17.5
+Café 176,shop,München,17.6
+Café 177,resto,São Paulo,17.7
+Café 178,shop,München,17.8
+Café 179,resto,München,17.9
+Café 180,shop,São Paulo,18.0
+Café 181,resto,München,18.1
+Café 182,shop,München,18.2
+Café 183,resto,São Paulo,18.3
+Café 184,shop,München,18.4
+Café 185,resto,München,18.5
+Café 186,shop,São Paulo,18.6
+Café 187,resto,München,18.7
+Café 188,shop,München,18.8
+Café 189,resto,São Paulo,18.9
+Café 190,shop,München,19.0
+Café 191,resto,München,19.1
+Café 192,shop,São Paulo,19.2
+Café 193,resto,München,19.3
+Café 194,shop,München,19.4
+Café 195,resto,São Paulo,19.5
+Café 196,shop,München,19.6
+Café 197,resto,München,19.7
+Café 198,shop,São Paulo,19.8
+Café 199,resto,München,19.9
+Café 200,shop,München,20.0
+Café 201,resto,São Paulo,20.1
+Café 202,shop,München,20.2
+Café 203,resto,München,20.3
+Café 204,shop,São Paulo,20.4
+Café 205,resto,München,20.5
+Café 206,shop,München,20.6
+Café 207,resto,São Paulo,20.7
+Café 208,shop,München,20.8
+Café 209,resto,München,20.9
+Café 210,shop,São Paulo,21.0
+Café 211,resto,München,21.1
+Café 212,shop,München,21.2
+Café 213,resto,São Paulo,21.3
+Café 214,shop,München,21.4
+Café 215,resto,München,21.5
+Café 216,shop,São Paulo,21.6
+Café 217,resto,München,21.7
+Café 218,shop,München,21.8
+Café 219,resto,São Paulo,21.9
+Café 220,shop,München,22.0
+Café 221,resto,München,22.1
+Café 222,shop,São Paulo,22.2
+Café 223,resto,München,22.3
+Café 224,shop,München,22.4
+Café 225,resto,São Paulo,22.5
+Café 226,shop,München,22.6
+Café 227,resto,München,22.7
+Café 228,shop,São Paulo,22.8
+Café 229,resto,München,22.9
+Café 230,shop,München,23.0
+Café 231,resto,São Paulo,23.1
+Café 232,shop,München,23.2
+Café 233,resto,München,23.3
+Café 234,shop,São Paulo,23.4
+Café 235,resto,München,23.5
+Café 236,shop,München,23.6
+Café 237,resto,São Paulo,23.7
+Café 238,shop,München,23.8
+Café 239,resto,München,23.9
+Café 240,shop,São Paulo,24.0
+Café 241,resto,München,24.1
+Café 242,shop,München,24.2
+Café 243,resto,São Paulo,24.3
+Café 244,shop,München,24.4
+Café 245,resto,München,24.5
+Café 246,shop,São Paulo,24.6
+Café 247,resto,München,24.7
+Café 248,shop,München,24.8
+Café 249,resto,São Paulo,24.9
+Café 250,shop,München,25.0
+Café 251,resto,München,25.1
+Café 252,shop,São Paulo,25.2
+Café 253,resto,München,25.3
+Café 254,shop,München,25.4
+Café 255,resto,São Paulo,25.5
+Café 256,shop,München,25.6
+Café 257,resto,München,25.7
+Café 258,shop,São Paulo,25.8
+Café 259,resto,München,25.9

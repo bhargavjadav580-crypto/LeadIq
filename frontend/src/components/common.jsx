@@ -1,0 +1,23 @@
+import React, {useEffect, useState} from 'react';
+import {Info, LoaderCircle, CheckCircle2, ArrowDownToLine, AlertTriangle, ChevronDown, Eye} from 'lucide-react';
+import {Button} from './ui/button';
+import {Tooltip,TooltipContent,TooltipProvider,TooltipTrigger} from './ui/tooltip';
+import {motion,useReducedMotion} from 'framer-motion';
+import {api,path,message,download,openPdf} from '../lib/api';
+import {toast} from 'sonner';
+
+export const Action = ({children,onClick,id,secondary=false,disabled=false,...props})=><Button data-testid={id} className={`action ${secondary?'secondary':''}`} variant={secondary?'outline':'default'} onClick={onClick} disabled={disabled} {...props}>{children}</Button>;
+export const Tip=({text,id})=><TooltipProvider><Tooltip><TooltipTrigger asChild><button type="button" className="info-button" aria-label={text} data-testid={`tip-${id}`}><Info size={14}/></button></TooltipTrigger><TooltipContent className="max-w-xs" data-testid={`tooltip-${id}`}>{text}</TooltipContent></Tooltip></TooltipProvider>;
+export const Notice=({children,type='info',id='notice'})=><div className={`notice ${type}`} role={type==='error'?'alert':'status'} data-testid={id}><AlertTriangle size={17}/><div>{children}</div></div>;
+export const Empty=({icon:Icon=Info,title,text})=><div className="empty-state" data-testid="empty-state"><Icon size={34}/><h3>{title}</h3><p>{text}</p></div>;
+export const Loading=()=> <div className="skeleton-stack" data-testid="loading-state"><div/><div/><div/></div>;
+export const Stat=({label,value,detail,tip,id})=>{const reduced=useReducedMotion();return <motion.div initial={reduced?false:{opacity:0,y:8}} animate={{opacity:1,y:0}} className="stat" data-testid={`stat-${id}`}><div className="stat-label">{label}{tip&&<Tip text={tip} id={id}/>}</div><strong data-testid={`stat-value-${id}`}>{value??'—'}</strong>{detail&&<span>{detail}</span>}</motion.div>};
+export const DownloadButton=({suffix,name,label,id,publicFile})=>{
+ const [busy,setBusy]=useState(false);
+ const run=async preview=>{setBusy(true);try{await (preview?openPdf(suffix):download(suffix,name,publicFile))}catch(e){toast.error(message(e))}finally{setBusy(false)}};
+ const button=<Action secondary id={id} disabled={busy} onClick={()=>run(false)}>{busy?<LoaderCircle size={15} className="spin"/>:<ArrowDownToLine size={15}/ >}{busy?'Preparing…':label}</Action>;
+ return name?.endsWith('.pdf')?<div className="pdf-actions">{button}<Action secondary id={`${id}-preview`} disabled={busy} onClick={()=>run(true)}><Eye size={15}/>Open PDF</Action></div>:button;
+};
+export const Table=({rows,columns,id='data-table'})=>{const cols=columns||Object.keys(rows?.[0]||{}).map(k=>({key:k,label:k}));return <div className="table-scroll" data-testid={id}><table><thead><tr>{cols.map(c=><th key={c.key}>{c.label}</th>)}</tr></thead><tbody>{rows?.map((r,i)=><tr key={i}>{cols.map(c=><td key={c.key} data-testid={`${id}-${i}-${c.key.replace(/\s/g,'-')}`}>{c.render?c.render(r[c.key],r,i):String(r[c.key]??'—')}</td>)}</tr>)}</tbody></table>{!rows?.length&&<p className="table-empty">No records to display.</p>}</div>};
+export const Details=({title,children,id})=><details className="details" data-testid={id}><summary>{title}<ChevronDown size={16}/></summary><div>{children}</div></details>;
+export function Job({jobId,onDone}){const [job,setJob]=useState(null);useEffect(()=>{let live=true;let timer;async function poll(){try{const r=await api.get(path(`/jobs/${jobId}`));if(!live)return;setJob(r.data);if(['completed','failed'].includes(r.data.status)){onDone(r.data);return}timer=setTimeout(poll,1500)}catch(e){if(live){toast.error(message(e));timer=setTimeout(poll,4000)}}}poll();return()=>{live=false;clearTimeout(timer)}},[jobId,onDone]);return <div className="job-panel" data-testid="job-progress"><div className="job-heading"><div className="progress-ring" style={{'--progress':`${job?.progress||0}%`}}><span>{job?.progress||0}%</span></div><div><span className="eyebrow">PROCESSING YOUR DATA</span><h3 data-testid="job-stage">{job?.stage||'Queued for processing'}</h3><p data-testid="job-progress-method">Stage progress · completed processing milestones, not elapsed-time prediction</p></div>{job?.status==='completed'?<CheckCircle2/>:job?.status==='failed'?<AlertTriangle/>:<LoaderCircle className="spin"/>}</div><div className="live-log" data-testid="job-logs">{job?.logs?.slice(-10).map((l,i)=><div key={i}><time>{l.time}</time><span>{l.message}</span></div>)}</div>{job?.error&&<Notice type="error" id="job-error">{job.error}</Notice>}</div>}

@@ -1,0 +1,8 @@
+crons:
+  - name: expire-projects
+    description: "Removes expired LeadIQ projects and their uploaded and derived files"
+    cron: "*/15 * * * *"
+    # Cron endpoints must ack 2xx immediately; enqueue/background the actual work.
+    endpoint: "{{BASE_URL}}/api/cron/cleanup"
+    method: POST
+    enabled: true
