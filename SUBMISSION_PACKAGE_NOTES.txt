@@ -1,0 +1,19 @@
+LeadIQ source-code submission package
+
+Included:
+- Backend Python source code, dependency list, and backend tests
+- Frontend React source code and package/configuration files
+- Project README and evaluation notes
+
+Excluded to keep this source-code ZIP small:
+- backend/model_cache/ (downloadable cached sentence-transformer model)
+- backend/project_data/ (generated/uploaded project datasets, trained model bundles,
+  predictions, and cached analysis artifacts)
+- reports/, test_reports/, and the standalone project report PDF
+
+Important:
+This is a source-code submission package, not a complete runtime/data backup.
+The backend may need project data/model artifacts to reproduce previously saved
+runs. Install dependencies using the included requirements.txt and frontend
+package.json. Model/cache artifacts can generally be recreated or downloaded
+as needed, depending on the project's implementation.

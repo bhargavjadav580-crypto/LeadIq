@@ -37,7 +37,15 @@ def engineer(df, spec, config, log=None, initial=False):
             out[c+' presence']=(s.notna()&~s.astype(str).str.lower().isin(['0','false','no','nan','none',''])).astype(float)
             flag=c+' is_valid'
             if flag in df:out[flag]=pd.to_numeric(df[flag],errors='coerce')
-        elif typ=='numeric' or role in ['Numeric','Rating','Review Count','Business Age','Boolean'] or typ=='boolean':out[c]=s.map(number)
+        elif typ=='numeric' or role in ['Numeric','Rating','Review Count','Business Age']:out[c]=s.map(number)
+        elif typ=='boolean' or role=='Boolean':
+            def to_bool_num(v):
+                if pd.isna(v): return np.nan
+                sv = str(v).strip().lower()
+                if sv in ['yes','true','y','1']: return 1.0
+                if sv in ['no','false','n','0']: return 0.0
+                return np.nan
+            out[c]=s.map(to_bool_num)
         elif typ=='datetime' or role=='Datetime':
             dt=pd.to_datetime(s,errors='coerce',utc=True,format='mixed');out[c+' year']=dt.dt.year;out[c+' month']=dt.dt.month;out[c+' weekday']=dt.dt.weekday;out[c+' days since']=(pd.Timestamp(spec['reference_date'])-dt).dt.total_seconds()/86400
         elif typ=='free text' or role in ['Text','Review Text']:

@@ -90,3 +90,13 @@ credentials.json
 *.key
 .credentials
 frontend/node_modules/.cache/default-development/6.pack
+
+# LeadIQ Runtime Data & Caches
+project_data/
+backend/project_data/
+backend/model_cache/
+frontend/build/
+*.pkl
+*.joblib
+*.npz
+*.bin

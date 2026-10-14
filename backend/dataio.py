@@ -10,7 +10,7 @@ from sklearn.model_selection import train_test_split
 ACCEPTED={'.csv','.tsv','.txt','.xlsx','.xls'}
 ROLE_NAMES=['Automatic','Business Name','Category','City','State','Rating','Review Count','Website','Phone','Email','Social','Previous Contact','Previous Response','Lead Source','Business Age','Text','Review Text','Identifier','Numeric','Categorical','Boolean','Datetime']
 ALIASES={'Business Name':['business name','company','company name','name'], 'Category':['category','industry','sector'], 'City':['city','town'], 'State':['state','province'], 'Rating':['rating','stars'], 'Review Count':['review count','reviews count','num reviews'], 'Website':['website','url','web'], 'Phone':['phone','mobile','telephone'], 'Email':['email','email address'], 'Social':['social','social media presence'], 'Previous Contact':['previous contact','contacted'], 'Previous Response':['previous response','responded'], 'Lead Source':['lead source','source'], 'Business Age':['business age','years operating'], 'Review Text':['review text','customer review'], 'Text':['description','text','notes','comment']}
-MISSING={'','n/a','na','null','none','-','?','unknown','nan'}
+MISSING = {'', ' ', 'n/a', 'na', 'null', 'none', '-', '?', '#n/a', '<na>', 'nan'}
 
 def unique_names(values):
     used=set(); names=[]

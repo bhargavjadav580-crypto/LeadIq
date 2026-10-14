@@ -1,15 +1,41 @@
 import importlib.metadata, time
 import numpy as np
-from sklearn.metrics import accuracy_score,precision_score,recall_score,f1_score,roc_auc_score,average_precision_score,confusion_matrix,roc_curve,precision_recall_curve
+from sklearn.metrics import accuracy_score,precision_score,recall_score,f1_score,roc_auc_score,average_precision_score,confusion_matrix,roc_curve,precision_recall_curve,brier_score_loss
 from sklearn.calibration import calibration_curve
 
 def evaluate(y,p,threshold=.5):
-    pred=np.asarray(p)>=threshold;y=np.asarray(y);n=max(1,int(np.ceil(len(y)*.1)));top=np.argsort(-np.asarray(p),kind='stable')[:n];precision_top=float(y[top].mean());prevalence=float(y.mean())
+    p=np.clip(np.asarray(p,dtype=float),0.0,1.0)
+    pred=p>=threshold;y=np.asarray(y,dtype=int);n=max(1,int(np.ceil(len(y)*.1)));top=np.argsort(-p,kind='stable')[:n];precision_top=float(y[top].mean());prevalence=float(y.mean())
     undefined={}
     if not pred.any():undefined['precision']='No records are predicted positive at this threshold; sklearn reports 0 by convention.'
     if not y.sum():undefined['recall']='There are no actual positive records; sklearn reports 0 by convention.'
     if not y.sum() and not pred.any():undefined['f1']='There are no actual or predicted positives; sklearn reports 0 by convention.'
-    return dict(accuracy=accuracy_score(y,pred),precision=precision_score(y,pred,zero_division=0),recall=recall_score(y,pred,zero_division=0),f1=f1_score(y,pred,zero_division=0),roc_auc=roc_auc_score(y,p) if len(np.unique(y))==2 else None,pr_auc=average_precision_score(y,p) if y.sum() else None,precision_top10=precision_top,lift_top10=precision_top/prevalence if prevalence else None,confusion_matrix=confusion_matrix(y,pred,labels=[0,1]).tolist(),threshold=float(threshold),undefined=undefined,predicted_positives=int(pred.sum()),actual_positives=int(y.sum()),evaluation_count=len(y))
+    
+    brier=float(brier_score_loss(y,p)) if len(y) else None
+    majority_acc=float(max(prevalence,1.0-prevalence)) if len(y) else None
+    baseline_brier=float(brier_score_loss(y,np.full_like(y,prevalence,dtype=float))) if len(y) else None
+    
+    return dict(
+        accuracy=accuracy_score(y,pred),
+        precision=precision_score(y,pred,zero_division=0),
+        recall=recall_score(y,pred,zero_division=0),
+        f1=f1_score(y,pred,zero_division=0),
+        roc_auc=roc_auc_score(y,p) if len(np.unique(y))==2 else None,
+        pr_auc=average_precision_score(y,p) if y.sum() else None,
+        brier_score=brier,
+        majority_baseline_accuracy=majority_acc,
+        constant_baseline_brier=baseline_brier,
+        predicted_conversion_rate=float(pred.mean()),
+        actual_conversion_rate=prevalence,
+        precision_top10=precision_top,
+        lift_top10=precision_top/prevalence if prevalence else None,
+        confusion_matrix=confusion_matrix(y,pred,labels=[0,1]).tolist(),
+        threshold=float(threshold),
+        undefined=undefined,
+        predicted_positives=int(pred.sum()),
+        actual_positives=int(y.sum()),
+        evaluation_count=len(y)
+    )
 
 def thin(x,y,limit=160):
     idx=np.unique(np.linspace(0,len(x)-1,min(limit,len(x))).astype(int));return [{'x':float(x[i]),'y':float(y[i])} for i in idx]

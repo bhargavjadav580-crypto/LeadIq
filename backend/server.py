@@ -14,10 +14,12 @@ from sklearn.model_selection import train_test_split
 from storage import db,folder,plain,create,project,update,remove,read,save,start_job,complete,invalidate,cleanup,locks
 from dataio import parse_file,profile,records,target_info,leakage,ROLE_NAMES
 from sample import sample_data
-from cleaning import clean_job,eda
+from typing import Any
+from cleaning import clean_job,eda,get_missing_plan
 from features import feature_job
 from training import train_job,verify
-from scoring import score_job,leads
+import joblib
+from scoring import score_job,leads,get_ranked_export_df
 from explanations import explain_lead
 from exports import tabular,pdf_export,methodology
 from evaluation import evaluate
@@ -31,7 +33,7 @@ async def lifespan(app):
     yield
 
 app=FastAPI(title='LeadIQ',lifespan=lifespan);router=APIRouter(prefix='/api')
-origins=os.environ['CORS_ORIGINS'].split(',')
+origins=os.environ.get('CORS_ORIGINS', 'http://localhost:3000,http://127.0.0.1:3000,*').split(',')
 app.add_middleware(CORSMiddleware,allow_origins=origins,allow_credentials=False,allow_methods=['GET','POST','PATCH','DELETE'],allow_headers=['Content-Type','X-Project-Key','Authorization','X-Webhook-Id','X-Webhook-Timestamp'])
 
 @app.exception_handler(ValueError)
@@ -53,10 +55,13 @@ class Configure(BaseModel):
     roles:dict[str,str]=Field(default_factory=dict)
     excluded:list[str]=Field(default_factory=list)
     leakage_overrides:list[str]=Field(default_factory=list)
-class Clean(BaseModel):keep_columns:list[str]=Field(default_factory=list)
+class Clean(BaseModel):
+    keep_columns: list[str] = Field(default_factory=list)
+    strategies: dict[str, Any] = Field(default_factory=dict)
+    custom_tokens: list[str] = Field(default_factory=list)
 class FeatureOptions(BaseModel):pretrained:bool=True
 class TrainOptions(BaseModel):mode:str='quick'
-class ScoreOptions(BaseModel):scope:str='test'
+class ScoreOptions(BaseModel):scope:str='all'
 class Sheet(BaseModel):sheet:str
 class Step(BaseModel):step:int=Field(ge=1,le=9)
 class Threshold(BaseModel):
@@ -69,6 +74,7 @@ class InspectRequest(BaseModel):
 class DownloadRequest(BaseModel):
     kind:str='export'
     format:str='pdf'
+    export_kind:str='ranked'
     top_n:int=Field(default=25,ge=1,le=1000)
     inline:bool=False
 
@@ -116,14 +122,62 @@ def configure(pid:str,body:Configure,p=Depends(auth)):
     for f in flags:f['excluded']=f['column'] in excluded
     config={**info,'roles':roles,'types':types,'excluded':sorted(excluded),'leakage':flags,'train_ids':train,'test_ids':test,'reference_date':p['created_at']};invalidate(pid,1);save(pid,'config',config);complete(pid,1);return plain(config)
 
+@router.get('/projects/{pid}/missing-plan')
+def missing_plan(pid: str, p=Depends(auth)):
+    require(pid, 1)
+    return plain(get_missing_plan(pid))
+
 @router.post('/projects/{pid}/clean')
-def cleaning(pid:str,body:Clean,p=Depends(auth)):idle(pid);require(pid,1);return start_job(pid,'clean',lambda log:clean_job(pid,body.keep_columns,log))
+def cleaning(pid: str, body: Clean, p=Depends(auth)):
+    idle(pid)
+    require(pid, 1)
+    return start_job(pid, 'clean', lambda log: clean_job(pid, body.keep_columns, log, strategies=body.strategies, custom_tokens=body.custom_tokens))
+
 @router.get('/projects/{pid}/quality')
-def quality(pid:str,p=Depends(auth)):return read(pid,'quality')
+def quality(pid: str, p=Depends(auth)):
+    return read(pid, 'quality')
+
 @router.get('/projects/{pid}/cleaned')
-def cleaned_download(pid:str,format:str='csv',p=Depends(auth)):
-    if format not in ['csv','xlsx']:raise ValueError('Choose CSV or Excel.')
-    data,mime=tabular(pd.read_pickle(folder(pid)/'clean.pkl'),format);return send(data,mime,f'leadiq-cleaned.{format}')
+@router.get('/projects/{pid}/download-clean')
+def cleaned_download(pid: str, format: str = 'csv', variant: str = 'filled', p=Depends(auth)):
+    if format not in ['csv', 'xlsx']:
+        raise ValueError('Choose CSV or Excel.')
+    if variant == 'structural':
+        target_path = folder(pid) / 'clean_structural.pkl'
+        suffix = 'structural'
+    else:
+        target_path = folder(pid) / 'clean_filled.pkl'
+        suffix = 'filled'
+    if not target_path.exists():
+        target_path = folder(pid) / 'clean.pkl'
+    data, mime = tabular(pd.read_pickle(target_path), format)
+    return send(data, mime, f'leadiq-cleaned-{suffix}.{format}')
+
+@router.get('/projects/{pid}/preview-clean')
+def preview_clean(pid: str, p=Depends(auth)):
+    require(pid, 2)
+    p_struct = folder(pid) / 'clean_structural.pkl'
+    p_filled = folder(pid) / 'clean_filled.pkl'
+    df_struct = pd.read_pickle(p_struct if p_struct.exists() else (folder(pid) / 'clean.pkl'))
+    df_filled = pd.read_pickle(p_filled if p_filled.exists() else df_struct)
+    
+    struct_head = df_struct.head(15).copy()
+    filled_head = df_filled.head(15).copy()
+    
+    filled_cells = []
+    for r_idx in range(min(len(struct_head), len(filled_head))):
+        for c in struct_head.columns:
+            if c in filled_head.columns:
+                s_val = struct_head.iloc[r_idx][c]
+                f_val = filled_head.iloc[r_idx][c]
+                if pd.isna(s_val) and pd.notna(f_val):
+                    filled_cells.append({'row': r_idx, 'column': c, 'filled_value': str(f_val)})
+                    
+    return plain({
+        'structural_sample': records(struct_head),
+        'filled_sample': records(filled_head),
+        'filled_cells': filled_cells
+    })
 @router.get('/projects/{pid}/eda')
 def get_eda(pid:str,p=Depends(auth)):require(pid,2);return plain(eda(pid))
 @router.post('/projects/{pid}/features')
@@ -183,15 +237,57 @@ def explain(pid:str,lead_id:str,p=Depends(auth)):
 @router.get('/projects/{pid}/summary')
 def summary(pid:str,p=Depends(auth)):require(pid,7);result=methodology(pid);complete(pid,9);return result
 @router.get('/projects/{pid}/export')
-def export(pid:str,format:str='csv',top_n:int=Query(25,ge=1,le=1000),p=Depends(auth)):
-    require(pid,5 if format=='metrics' else 7)
+def export(pid:str,format:str='csv',kind:str='ranked',top_n:int=Query(25,ge=1,le=1000),p=Depends(auth)):
+    require(pid, 2 if kind in ['cleaned', 'cleaned_business'] else 4 if kind in ['encoded', 'cleaned_encoded'] else 5 if (format=='metrics' or kind=='evaluation') else 7)
     if format in ['csv','xlsx']:
-        df=pd.read_pickle(folder(pid)/'scores.pkl').drop(columns=['row_position']);data,mime=tabular(df,format)
-    elif format=='pdf':data,mime=pdf_export(pid,top_n)
+        if kind in ['cleaned', 'cleaned_business']:
+            target_file = folder(pid) / 'cleaned_business.pkl'
+            if not target_file.exists():
+                target_file = folder(pid) / 'clean_structural.pkl'
+            if not target_file.exists():
+                target_file = folder(pid) / 'clean.pkl'
+            df = pd.read_pickle(target_file)
+            data, mime = tabular(df, format)
+            return send(data, mime, f'leadiq-cleaned-business-dataset.{format}')
+        elif kind in ['encoded', 'cleaned_encoded']:
+            b = joblib.load(folder(pid) / 'bundle.joblib')
+            df = b['X'].copy()
+            if 'y' in b and b['y'] is not None:
+                df['target_encoded'] = b['y']
+            data, mime = tabular(df, format)
+            return send(data, mime, f'leadiq-encoded-features.{format}')
+        elif kind == 'evaluation':
+            metrics = read(pid, 'metrics')
+            best = metrics['best']
+            pfile = np.load(folder(pid) / best['prediction_file'])
+            te = metrics['test_rows']
+            target_file = folder(pid) / 'cleaned_business.pkl'
+            if not target_file.exists():
+                target_file = folder(pid) / 'clean_structural.pkl'
+            if not target_file.exists():
+                target_file = folder(pid) / 'clean.pkl'
+            clean_df = pd.read_pickle(target_file)
+            df = clean_df.loc[clean_df.index.isin(te)].copy().reset_index(drop=True)
+            if len(df) != len(pfile['y']):
+                df = clean_df.iloc[:len(pfile['y'])].copy().reset_index(drop=True)
+            df['actual_outcome'] = pfile['y']
+            df['predicted_conversion_probability'] = np.round(pfile['probability'], 4)
+            df['predicted_label'] = np.where(pfile['probability'] >= best['threshold'], 1, 0)
+            df['prediction_source'] = 'held_out'
+            df['prediction_status'] = 'Held-out test set'
+            data, mime = tabular(df, format)
+            return send(data, mime, f'leadiq-evaluation-results.{format}')
+        else:
+            scores_df = pd.read_pickle(folder(pid) / 'scores.pkl')
+            raw_cols = list(pd.read_pickle(folder(pid) / 'raw.pkl').columns) if (folder(pid) / 'raw.pkl').exists() else None
+            df = get_ranked_export_df(scores_df, raw_cols)
+            data, mime = tabular(df, format)
+            return send(data, mime, f'leadiq-ranked-leads.{format}')
+    elif format=='pdf':data,mime=pdf_export(pid,top_n);return send(data,mime,f'leadiq-ranked-leads.pdf')
     elif format=='metrics':return send(json.dumps(read(pid,'metrics'),indent=2).encode(),'application/json','metrics.json')
     elif format=='reproducibility':return send(json.dumps(methodology(pid),indent=2).encode(),'application/json','reproducibility.json')
     else:raise ValueError('Choose CSV, Excel, PDF, metrics, or reproducibility.')
-    return send(data,mime,f'leadiq-ranked-leads.{format}')
+
 @router.get('/sample.csv')
 def sample_csv():data,mime=tabular(sample_data(),'csv');return send(data,mime,'synthetic-demo-leads.csv')
 @router.get('/template.csv')
@@ -203,7 +299,7 @@ def download_link(pid:str,body:DownloadRequest,p=Depends(auth)):
     if body.kind=='cleaned':
         result=cleaned_download(pid,body.format,p)
     elif body.kind=='export':
-        result=export(pid,body.format,body.top_n,p)
+        result=export(pid,body.format,body.export_kind,body.top_n,p)
     else:raise ValueError('Unknown download type.')
     if body.inline and result.media_type!='application/pdf':raise ValueError('Browser preview is available for PDF reports only.')
     content=result.body
@@ -233,7 +329,7 @@ def native_download(ticket:str):
 @router.post('/cron/cleanup')
 async def scheduled_cleanup(request:Request,background:BackgroundTasks,authorization:str=Header(default=''),x_webhook_id:str=Header(default='')):
     # Cron endpoints must ack 2xx immediately; enqueue/background the actual work.
-    expected='Bearer '+os.environ['WEBHOOK_CRON_SECRET']
+    expected='Bearer '+os.environ.get('WEBHOOK_CRON_SECRET', 'leadiq_cron_secret')
     if not secrets.compare_digest(authorization,expected):raise HTTPException(401,'Unauthorized')
     try:body=await request.json()
     except Exception:raise HTTPException(400,'Invalid JSON envelope.')

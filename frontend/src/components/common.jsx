@@ -11,7 +11,7 @@ export const Tip=({text,id})=><TooltipProvider><Tooltip><TooltipTrigger asChild>
 export const Notice=({children,type='info',id='notice'})=><div className={`notice ${type}`} role={type==='error'?'alert':'status'} data-testid={id}><AlertTriangle size={17}/><div>{children}</div></div>;
 export const Empty=({icon:Icon=Info,title,text})=><div className="empty-state" data-testid="empty-state"><Icon size={34}/><h3>{title}</h3><p>{text}</p></div>;
 export const Loading=()=> <div className="skeleton-stack" data-testid="loading-state"><div/><div/><div/></div>;
-export const Stat=({label,value,detail,tip,id})=>{const reduced=useReducedMotion();return <motion.div initial={reduced?false:{opacity:0,y:8}} animate={{opacity:1,y:0}} className="stat" data-testid={`stat-${id}`}><div className="stat-label">{label}{tip&&<Tip text={tip} id={id}/>}</div><strong data-testid={`stat-value-${id}`}>{value??'—'}</strong>{detail&&<span>{detail}</span>}</motion.div>};
+export const Stat=({label,value,detail,tip,id})=>{const reduced=useReducedMotion();return <motion.div initial={reduced?false:{opacity:0,y:8}} animate={{opacity:1,y:0}} whileHover={reduced?{}:{y:-3,transition:{duration:0.2}}} className="stat" data-testid={`stat-${id}`}><div className="stat-label">{label}{tip&&<Tip text={tip} id={id}/>}</div><strong data-testid={`stat-value-${id}`}>{value??'—'}</strong>{detail&&<span>{detail}</span>}</motion.div>};
 export const DownloadButton=({suffix,name,label,id,publicFile})=>{
  const [busy,setBusy]=useState(false);
  const run=async preview=>{setBusy(true);try{await (preview?openPdf(suffix):download(suffix,name,publicFile))}catch(e){toast.error(message(e))}finally{setBusy(false)}};

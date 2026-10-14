@@ -14,9 +14,9 @@ def safe(v):
 
 def tabular(df,fmt):
     df=df.copy();df.columns=[safe(str(c)) for c in df.columns];df=df.map(safe);buf=io.BytesIO()
-    if fmt=='csv':return df.to_csv(index=False).encode('utf-8-sig'),'text/csv'
+    if fmt=='csv':return df.to_csv(index=False,na_rep='').encode('utf-8-sig'),'text/csv'
     with pd.ExcelWriter(buf,engine='openpyxl') as writer:
-        df.to_excel(writer,index=False,sheet_name='LeadIQ results');ws=writer.sheets['LeadIQ results'];ws.freeze_panes='A2';ws.auto_filter.ref=ws.dimensions
+        df.to_excel(writer,index=False,sheet_name='LeadIQ results',na_rep='');ws=writer.sheets['LeadIQ results'];ws.freeze_panes='A2';ws.auto_filter.ref=ws.dimensions
         for cell in ws[1]:cell.font=Font(color='FFFFFF',bold=True);cell.fill=PatternFill('solid',fgColor='6355D8');cell.alignment=Alignment(wrap_text=True)
         for col in ws.columns:
             width=min(42,max(12,max(len(str(c.value or '')) for c in list(col)[:50])+2));ws.column_dimensions[col[0].column_letter].width=width

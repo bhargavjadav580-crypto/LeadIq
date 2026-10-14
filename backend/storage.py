@@ -9,9 +9,20 @@ from fastapi import HTTPException
 from dotenv import load_dotenv
 
 load_dotenv(Path(__file__).parent / '.env')
-ROOT = Path(os.environ['PROJECT_DATA_DIR'])
+_raw_dir = os.environ.get('PROJECT_DATA_DIR', 'project_data')
+ROOT = Path(_raw_dir) if Path(_raw_dir).is_absolute() else (Path(__file__).parent / _raw_dir)
 ROOT.mkdir(parents=True, exist_ok=True)
-db = MongoClient(os.environ['MONGO_URL'])[os.environ['DB_NAME']]
+mongo_url = os.environ.get('MONGO_URL', 'mongodb://localhost:27017')
+db_name = os.environ.get('DB_NAME', 'leadiq')
+try:
+    if mongo_url.lower() == 'mock':
+        raise Exception('Using mongomock')
+    _client = MongoClient(mongo_url, serverSelectionTimeoutMS=1500)
+    _client.admin.command('ping')
+    db = _client[db_name]
+except Exception:
+    import mongomock
+    db = mongomock.MongoClient()[db_name]
 pool = ThreadPoolExecutor(max_workers=2)
 locks = {}
 
@@ -72,7 +83,7 @@ def invalidate(pid, step):
     state={'results_revision':revision,'invalidated_from':step,'invalidated_at':datetime.now(timezone.utc).isoformat()}
     if step<=5:state['active_run_id']=None
     db.projects.update_one({'id':pid},{'$pull':{'completed':{'$gte':step}},'$set':state})
-    names = {1:['config'],2:['clean','quality','eda'],4:['features','bundle'],5:['metrics','trained','importance','shap_background','verification'],7:['scores','scored','score_summary']}
+    names = {1:['config'], 2:['clean', 'clean_structural', 'clean_filled', 'cleaning_strategy', 'missing_plan', 'quality', 'eda'], 4:['features', 'bundle'], 5:['metrics', 'trained', 'importance', 'shap_background', 'verification'], 7:['scores', 'scored', 'score_summary']}
     for s, files in names.items():
         if s>=step:
             for name in files:
